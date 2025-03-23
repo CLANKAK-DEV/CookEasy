@@ -1,11 +1,10 @@
 package com.example.cookeasy
 
-// RetrofitClient.kt
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "https://api.spoonacular.com/"
+    private const val BASE_URL = "https://www.themealdb.com/api/json/v1/1/"
 
     val apiService: ApiService by lazy {
         Retrofit.Builder()

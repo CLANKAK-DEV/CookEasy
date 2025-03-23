@@ -1,6 +1,5 @@
 package com.example.cookeasy
 
-// AppDatabase.kt
 import androidx.room.Database
 import androidx.room.RoomDatabase
 

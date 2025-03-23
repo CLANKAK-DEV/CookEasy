@@ -15,12 +15,7 @@ import kotlinx.coroutines.withContext
 fun TipsScreen() {
     val tips = remember { mutableStateOf<List<Tip>>(emptyList()) }
 
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            val tip = RetrofitClient.apiService.getTip()
-            tips.value = listOf(tip) // Spoonacular returns one trivia at a time; adjust for multiple if needed
-        }
-    }
+
 
     LazyColumn {
         items(tips.value) { tip ->

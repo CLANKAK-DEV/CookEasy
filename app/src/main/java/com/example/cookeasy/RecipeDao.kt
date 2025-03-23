@@ -1,9 +1,11 @@
 package com.example.cookeasy
 
-// RecipeDao.kt
 import androidx.room.Dao
+import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.Query
+
+
 
 @Dao
 interface RecipeDao {
