@@ -1,7 +1,9 @@
 package com.example.cookeasy
 
+import androidx.room.Delete
 import retrofit2.http.GET
 import retrofit2.http.Query
+
 
 interface ApiService {
     @GET("search.php")
@@ -28,7 +30,7 @@ data class TheMealDBMeal(
     val idMeal: String,
     val strMeal: String,
     val strMealThumb: String?,
-    val strCategory: String?, // Ensure this field exists
+    val strCategory: String?,
     val strInstructions: String?,
     val strYoutube: String?,
     val strSource: String?,
@@ -55,10 +57,9 @@ data class TheMealDBMeal(
 )
 
 
+
 // Updated Recipe conversion - only uses YouTube duration
 fun TheMealDBMeal.toRecipe(category: String? = null): Recipe {
-    val youtubeDuration = strYoutube?.let { extractVideoDuration(it) }
-
     return Recipe(
         id = idMeal.toIntOrNull() ?: 0,
         title = strMeal,

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -196,7 +197,7 @@ fun RecipeCard(
                         )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
-                            indication = rememberRipple(bounded = false, color = accentColor)
+                            indication = LocalIndication.current // Use default ripple effect
                         ) {
                             onSaveClick(recipe, isSavedState.value)
                             isSavedState.value = !isSavedState.value
@@ -343,161 +344,15 @@ fun HomeScreenUI(
                         focusManager.clearFocus()
                     }
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val searchBarFocused = remember { mutableStateOf(false) }
-
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = onSearchQueryChange,
-                        placeholder = {
-                            Text(
-                                "Search Recipes",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Outlined.Search,
-                                contentDescription = "Search Icon",
-                                tint = Color(0xFFFF5722)
-                            )
-                        },
-                        trailingIcon = {
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { onSearchQueryChange("") }) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Close,
-                                        contentDescription = "Clear search",
-                                        tint = Color(0xFFFF5722)
-                                    )
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .shadow(4.dp, RoundedCornerShape(16.dp))
-                            .background(Color.White, RoundedCornerShape(16.dp))
-                            .onFocusChanged {
-                                searchBarFocused.value = it.isFocused
-                                if (it.isFocused) {
-                                    expandedCategoryDropdown = false
-                                }
-                            },
-                        shape = RoundedCornerShape(16.dp),
-                        textStyle = MaterialTheme.typography.bodyMedium,
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFFFF5722),
-                            unfocusedBorderColor = Color.Black.copy(alpha = 0.3f),
-                            containerColor = Color.White
-                        ),
-                        singleLine = true
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .height(56.dp)
-                            .width(120.dp)
-                    ) {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(4.dp, RoundedCornerShape(16.dp))
-                                .background(Color.White, RoundedCornerShape(16.dp))
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    expandedCategoryDropdown = !expandedCategoryDropdown
-                                    focusManager.clearFocus()
-                                },
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(
-                                width = 1.dp,
-                                color = Color.Black.copy(alpha = 0.3f)
-                            )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = selectedCategory,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.Black
-                                )
-                                Icon(
-                                    imageVector = if (expandedCategoryDropdown)
-                                        Icons.Filled.KeyboardArrowUp
-                                    else
-                                        Icons.Filled.KeyboardArrowDown,
-                                    contentDescription = "Toggle category dropdown",
-                                    tint = Color(0xFFFF5722)
-                                )
-                            }
-                        }
-
-                        DropdownMenu(
-                            expanded = expandedCategoryDropdown,
-                            onDismissRequest = { expandedCategoryDropdown = false },
-                            modifier = Modifier
-                                .width(140.dp)
-                                .background(
-                                    color = Color.White,
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .shadow(8.dp),
-                            properties = PopupProperties(focusable = true)
-                        ) {
-                            val categories = listOf(
-                                "All", "Chicken", "Beef", "Dessert", "Seafood", "Vegetarian",
-                                "Pasta", "Pork", "Breakfast", "Side", "Soup", "Salad", "Lamb",
-                                "Miscellaneous", "Starter"
-                            )
-
-                            categories.forEach { category ->
-                                val isSelected = category == selectedCategory
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = category,
-                                            color = if (isSelected) Color(0xFFFF5722) else Color.Black,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                        )
-                                    },
-                                    onClick = {
-                                        onCategorySelected(category)
-                                        if (category == "All") {
-                                            expandedCategoryDropdown = true
-                                        } else {
-                                            expandedCategoryDropdown = false
-                                        }
-                                    },
-                                    leadingIcon = {
-                                        if (isSelected) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Check,
-                                                contentDescription = null,
-                                                tint = Color(0xFFFF5722)
-                                            )
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(Color.Transparent)
-                                )
-                            }
-                        }
-                    }
-                }
+                // Replace the existing search bar Row with MemeSearchBarTile
+                MemeSearchBarTile(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = onSearchQueryChange,
+                    selectedCategory = selectedCategory,
+                    onCategorySelected = onCategorySelected,
+                    expandedCategoryDropdown = expandedCategoryDropdown,
+                    onExpandedCategoryDropdownChange = { expandedCategoryDropdown = it }
+                )
 
                 AnimatedVisibility(
                     visible = selectedCategory != "All",
@@ -609,7 +464,6 @@ fun HomeScreenUI(
                             }
                         }
                         else -> {
-                            // Wrapping LazyRow in a Column to maintain vertical scroll capability
                             LazyColumn(
                                 state = listState,
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -635,7 +489,6 @@ fun HomeScreenUI(
                                                 )
                                             }
                                         }
-                                        // Add empty box if there's only one recipe in the pair
                                         if (recipePair.size < 2) {
                                             Box(modifier = Modifier.weight(1f))
                                         }
@@ -659,6 +512,210 @@ fun HomeScreenUI(
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MemeSearchBarTile(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit,
+    expandedCategoryDropdown: Boolean,
+    onExpandedCategoryDropdownChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val focusManager = LocalFocusManager.current
+    val searchBarFocused = remember { mutableStateOf(false) }
+
+    // Animation for a subtle scale effect on click
+    var isClicked by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (isClicked) 0.90f else 1f, // More pronounced shrink for larger size
+        animationSpec = tween(durationMillis = 200),
+        label = "memeTileScale"
+    )
+
+    // Animation for focus/hover effect
+    val searchFieldScale by animateFloatAsState(
+        targetValue = if (searchBarFocused.value) 1.04f else 1f, // Larger scale on focus
+        animationSpec = tween(durationMillis = 200),
+        label = "searchFieldScale"
+    )
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp) // Increased padding
+            .background(Color.Transparent, shape = RoundedCornerShape(20.dp)) // Transparent background
+            .scale(scale)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                isClicked = !isClicked
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp) // Increased spacing
+    ) {
+        // Search input field
+        TextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            placeholder = {
+                Text(
+                    text = "Search 🥐",
+                    style = MaterialTheme.typography.titleMedium, // Even larger text
+                    color = Color.Gray.copy(alpha = 0.7f)
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Search,
+                    contentDescription = "Search Icon",
+                    tint = Color(0xFFFF7043),
+                    modifier = Modifier.size(28.dp) // Larger icon
+                )
+            },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { onSearchQueryChange("") }) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Clear search",
+                            tint = Color(0xFFFF7043),
+                            modifier = Modifier.size(28.dp) // Larger icon
+                        )
+                    }
+                }
+            },
+            modifier = Modifier
+                .weight(1f)
+                .height(70.dp) // Increased height
+                .scale(searchFieldScale)
+                .padding(start = 16.dp, top = 10.dp, bottom = 10.dp) // Increased padding
+                .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp)) // Larger corner radius
+                .onFocusChanged {
+                    searchBarFocused.value = it.isFocused
+                    if (it.isFocused) {
+                        onExpandedCategoryDropdownChange(false)
+                    }
+                },
+            textStyle = MaterialTheme.typography.titleMedium.copy(color = Color.Black), // Larger text
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color(0xFFFF7043),
+                unfocusedIndicatorColor = Color.Gray.copy(alpha = 0.3f),
+                focusedContainerColor = Color.Transparent, // Updated parameter
+                unfocusedContainerColor = Color.Transparent, // Updated parameter
+                focusedLabelColor = Color(0xFFFF7043),
+                cursorColor = Color(0xFFFF7043)
+            ),
+            singleLine = true
+        )
+
+        // Category dropdown
+        Box(
+            modifier = Modifier
+                .height(70.dp) // Increased height
+                .width(140.dp) // Increased width
+                .padding(end = 16.dp) // Increased padding
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        onExpandedCategoryDropdownChange(!expandedCategoryDropdown)
+                        focusManager.clearFocus()
+                    },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = Color.Gray.copy(alpha = 0.3f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 12.dp), // Increased padding
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = if (selectedCategory == "All") "All" else selectedCategory,
+                        style = MaterialTheme.typography.titleMedium, // Larger text
+                        color = Color.Black
+                    )
+                    Icon(
+                        imageVector = if (expandedCategoryDropdown)
+                            Icons.Filled.KeyboardArrowUp
+                        else
+                            Icons.Filled.KeyboardArrowDown,
+                        contentDescription = "Toggle category dropdown",
+                        tint = Color(0xFFFF7043),
+                        modifier = Modifier.size(28.dp) // Larger icon
+                    )
+                }
+            }
+
+            DropdownMenu(
+                expanded = expandedCategoryDropdown,
+                onDismissRequest = { onExpandedCategoryDropdownChange(false) },
+                modifier = Modifier
+                    .width(160.dp) // Increased width to match larger design
+                    .background(
+                        color = Color.White,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .shadow(4.dp),
+                properties = PopupProperties(focusable = true)
+            ) {
+                val categories = listOf(
+                    "All", "Chicken", "Beef", "Dessert", "Seafood", "Vegetarian",
+                    "Pasta", "Pork", "Breakfast", "Side", "Soup", "Salad", "Lamb",
+                    "Miscellaneous", "Starter"
+                )
+
+                categories.forEach { category ->
+                    val isSelected = category == selectedCategory
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = category,
+                                color = if (isSelected) Color(0xFFFF7043) else Color.Black,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                style = MaterialTheme.typography.titleMedium // Larger text
+                            )
+                        },
+                        onClick = {
+                            onCategorySelected(category)
+                            if (category == "All") {
+                                onExpandedCategoryDropdownChange(true)
+                            } else {
+                                onExpandedCategoryDropdownChange(false)
+                            }
+                        },
+                        leadingIcon = {
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = Color(0xFFFF7043),
+                                    modifier = Modifier.size(28.dp) // Larger icon
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.Transparent)
+                    )
                 }
             }
         }

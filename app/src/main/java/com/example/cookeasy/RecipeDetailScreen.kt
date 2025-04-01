@@ -38,7 +38,6 @@ import kotlin.random.Random
 val Orange = Color(0xFFFF5722)
 val White = Color.White
 val Black = Color.Black
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailScreen(
@@ -70,11 +69,7 @@ fun RecipeDetailScreen(
         }
     }
 
-    // Generate placeholder stats for UI enhancement
-    val cookTime = remember { Random.nextInt(10, 60) }
-    val servings = remember { Random.nextInt(2, 8) }
-    val calories = remember { Random.nextInt(250, 800) }
-
+    // Use WindowInsets to handle system bars
     Scaffold(
         topBar = {
             TopAppBar(
@@ -82,7 +77,7 @@ fun RecipeDetailScreen(
                     Text(
                         "Recipe Details",
                         color = Black,
-                        fontSize = 20.sp, // Simplified font size
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -116,10 +111,15 @@ fun RecipeDetailScreen(
                     titleContentColor = Black,
                     actionIconContentColor = Black,
                     navigationIconContentColor = Black
-                )
+                ),
+                modifier = Modifier
+                    .background(White)
+                    .windowInsetsPadding(WindowInsets.statusBars) // Extend into status bar
             )
         },
-        containerColor = White
+        containerColor = White,
+        modifier = Modifier
+            .windowInsetsPadding(WindowInsets.navigationBars) // Handle navigation bar
     ) { padding ->
         if (isLoading) {
             Box(
@@ -132,13 +132,13 @@ fun RecipeDetailScreen(
                     CircularProgressIndicator(
                         color = Orange,
                         strokeWidth = 4.dp,
-                        modifier = Modifier.size(40.dp) // Simplified size
+                        modifier = Modifier.size(40.dp)
                     )
-                    Spacer(modifier = Modifier.height(8.dp)) // Reduced spacing
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         "Loading recipe...",
                         color = Black,
-                        fontSize = 16.sp, // Simplified font size
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -155,32 +155,32 @@ fun RecipeDetailScreen(
                         painter = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_dialog_alert),
                         contentDescription = "Error",
                         tint = Orange,
-                        modifier = Modifier.size(48.dp) // Simplified size
+                        modifier = Modifier.size(48.dp)
                     )
-                    Spacer(modifier = Modifier.height(8.dp)) // Reduced spacing
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = errorMessage ?: "Unknown error",
                         color = Black,
-                        fontSize = 16.sp, // Simplified font size
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                    Spacer(modifier = Modifier.height(12.dp)) // Reduced spacing
+                    Spacer(modifier = Modifier.height(12.dp))
                     Button(
                         onClick = { isLoading = true; errorMessage = null; /* Retry logic */ },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Orange,
                             contentColor = White
                         ),
-                        shape = RoundedCornerShape(8.dp), // Simplified shape
+                        shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
-                            .height(40.dp) // Simplified height
+                            .height(40.dp)
                     ) {
                         Text(
                             "Retry",
-                            fontSize = 14.sp, // Simplified font size
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -188,6 +188,10 @@ fun RecipeDetailScreen(
             }
         } else {
             recipeDetails?.let { details ->
+                // Calculate stats using the AI-like function with the meal object
+                val stats = suggestRecipeStats(details)
+                val ingredients = details.toIngredients()
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -203,28 +207,28 @@ fun RecipeDetailScreen(
                                 contentDescription = "Recipe Image",
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(200.dp) // Simplified height
-                                    .clip(RoundedCornerShape(8.dp)), // Simplified corner radius
+                                    .height(200.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
                                 contentScale = ContentScale.Crop
                             )
-                            Spacer(modifier = Modifier.height(8.dp)) // Reduced spacing
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
 
                         // 2. Recipe Title with Category
                         Text(
                             text = details.strMeal,
-                            fontWeight = FontWeight.Bold, // Simplified weight
-                            fontSize = 28.sp, // Slightly reduced font size
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 28.sp,
                             color = Black
                         )
                         details.strCategory?.let { category ->
                             Text(
                                 text = category,
-                                fontSize = 16.sp, // Simplified font size
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Orange
                             )
-                            Spacer(modifier = Modifier.height(4.dp)) // Reduced spacing
+                            Spacer(modifier = Modifier.height(4.dp))
                         }
 
                         // 3. Recipe Info Cards (Cook Time, Servings, Calories)
@@ -235,26 +239,26 @@ fun RecipeDetailScreen(
                         ) {
                             RecipeInfoCard(
                                 icon = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_recent_history),
-                                title = "$cookTime min",
+                                title = "${stats.cookTime} min",
                                 subtitle = "Cook Time"
                             )
                             RecipeInfoCard(
                                 icon = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_myplaces),
-                                title = "$servings",
+                                title = stats.servings.toString(),
                                 subtitle = "Servings"
                             )
                             RecipeInfoCard(
                                 icon = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_sort_by_size),
-                                title = "$calories",
+                                title = stats.calories.toString(),
                                 subtitle = "Calories"
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp)) // Reduced spacing
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // 4. Watch Preparation Video
                         details.strYoutube?.let { youtubeUrl ->
                             SectionTitle(title = "Watch Preparation Video")
-                            Spacer(modifier = Modifier.height(4.dp)) // Reduced spacing
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             val youtubeVideoId = extractYouTubeVideoId(youtubeUrl)
                             if (youtubeVideoId != null) {
@@ -272,8 +276,8 @@ fun RecipeDetailScreen(
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(200.dp) // Simplified height
-                                        .clip(RoundedCornerShape(8.dp)) // Simplified corner radius
+                                        .height(200.dp)
+                                        .clip(RoundedCornerShape(8.dp))
                                 )
                             } else {
                                 EmptyStateMessage(message = "Invalid YouTube URL.")
@@ -281,12 +285,11 @@ fun RecipeDetailScreen(
                         } ?: run {
                             EmptyStateMessage(message = "No video available for this recipe.")
                         }
-                        Spacer(modifier = Modifier.height(8.dp)) // Reduced spacing
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // 5. Ingredients Section
                         SectionTitle(title = "Ingredients")
-                        Spacer(modifier = Modifier.height(4.dp)) // Reduced spacing
-                        val ingredients = details.toIngredients()
+                        Spacer(modifier = Modifier.height(4.dp))
                         if (ingredients.isEmpty()) {
                             EmptyStateMessage(message = "No ingredients available.")
                         } else {
@@ -306,11 +309,11 @@ fun RecipeDetailScreen(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(8.dp)) // Reduced spacing
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // 6. Preparation Steps
                         SectionTitle(title = "Preparation Steps")
-                        Spacer(modifier = Modifier.height(4.dp)) // Reduced spacing
+                        Spacer(modifier = Modifier.height(4.dp))
                         if (details.strInstructions.isNullOrEmpty()) {
                             EmptyStateMessage(message = "No instructions available.")
                         } else {
@@ -322,7 +325,7 @@ fun RecipeDetailScreen(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 4.dp), // Reduced padding
+                                        .padding(vertical = 4.dp),
                                     verticalAlignment = Alignment.Top
                                 ) {
                                     Text(
@@ -331,18 +334,18 @@ fun RecipeDetailScreen(
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp)) // Reduced spacing
+                                    Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = "$instruction.",
                                         fontSize = 16.sp,
                                         color = Black,
-                                        lineHeight = 22.sp, // Simplified line height
+                                        lineHeight = 22.sp,
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp)) // Reduced final spacing
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
@@ -350,12 +353,13 @@ fun RecipeDetailScreen(
     }
 }
 
+
 @Composable
 fun SectionTitle(title: String) {
     Text(
         text = title,
         fontWeight = FontWeight.Bold,
-        fontSize = 20.sp, // Simplified font size
+        fontSize = 20.sp,
         color = Black
     )
 }
@@ -365,12 +369,12 @@ fun EmptyStateMessage(message: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp), // Reduced padding
+            .padding(vertical = 4.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = message,
-            fontSize = 14.sp, // Simplified font size
+            fontSize = 14.sp,
             color = Black.copy(alpha = 0.6f),
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium,
@@ -387,26 +391,26 @@ fun RecipeInfoCard(
 ) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 4.dp), // Simplified padding
+            .padding(horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             painter = icon,
             contentDescription = subtitle,
             tint = Orange,
-            modifier = Modifier.size(20.dp) // Simplified size
+            modifier = Modifier.size(20.dp)
         )
-        Spacer(modifier = Modifier.height(4.dp)) // Reduced spacing
+        Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = title,
             fontWeight = FontWeight.Bold,
-            fontSize = 12.sp, // Simplified font size
+            fontSize = 12.sp,
             color = Black
         )
-        Spacer(modifier = Modifier.height(2.dp)) // Reduced spacing
+        Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = subtitle,
-            fontSize = 8.sp, // Simplified font size
+            fontSize = 8.sp,
             color = Black.copy(alpha = 0.6f),
             fontWeight = FontWeight.Medium
         )
@@ -421,7 +425,7 @@ fun IngredientCard(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp), // Reduced padding
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Ingredient image
@@ -430,29 +434,29 @@ fun IngredientCard(
             model = ingredientImageUrl,
             contentDescription = ingredient.name,
             modifier = Modifier
-                .size(48.dp) // Simplified size
-                .clip(RoundedCornerShape(4.dp)), // Simplified corner radius
+                .size(48.dp)
+                .clip(RoundedCornerShape(4.dp)),
             contentScale = ContentScale.Fit,
             error = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_report_image),
             placeholder = androidx.compose.ui.res.painterResource(id = android.R.drawable.ic_menu_report_image)
         )
-        Spacer(modifier = Modifier.width(8.dp)) // Reduced spacing
+        Spacer(modifier = Modifier.width(8.dp))
         // Ingredient details
         Column {
             Text(
                 text = ingredient.name,
-                fontWeight = FontWeight.Bold, // Simplified weight
-                fontSize = 16.sp, // Simplified font size
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
                 color = Black,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(2.dp)) // Reduced spacing
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = formatQuantity(ingredient),
-                fontSize = 12.sp, // Simplified font size
+                fontSize = 12.sp,
                 color = Orange,
-                fontWeight = FontWeight.Medium, // Simplified weight
+                fontWeight = FontWeight.Medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -485,4 +489,122 @@ fun extractYouTubeVideoId(url: String): String? {
         }
     }
     return null
+}
+
+
+
+fun suggestRecipeStats(meal: TheMealDBMeal): RecipeStats {
+    // Get the ingredients directly from the meal object
+    val ingredients = meal.toIngredients()
+
+    if (ingredients.isEmpty()) {
+        return RecipeStats(
+            cookTime = 10, // Default for empty list
+            servings = 1,
+            calories = 100
+        )
+    }
+
+    // Step 1: Analyze each ingredient
+    var totalCookTime = 0
+    var totalCalories = 0
+    var totalServingContribution = 0.0
+
+    for (ingredient in ingredients) {
+        // Infer the type of ingredient based on its name
+        val nameLower = ingredient.name.lowercase()
+        val isMeat = nameLower.contains("chicken") || nameLower.contains("beef") ||
+                nameLower.contains("pork") || nameLower.contains("lamb") || nameLower.contains("fish")
+        val isVegetable = nameLower.contains("onion") || nameLower.contains("challot") ||
+                nameLower.contains("garlic") || nameLower.contains("carrot") || nameLower.contains("potato")
+        val isSpice = nameLower.contains("salt") || nameLower.contains("pepper") || nameLower.contains("spice")
+        val isOil = nameLower.contains("oil")
+
+        // Determine base properties based on type
+        val baseCookTime = when {
+            isMeat -> 20 // Meats take longer to cook
+            isVegetable -> 5 // Vegetables are quicker
+            isOil || isSpice -> 0 // Spices and oils don't add to cook time
+            else -> 5 // Default for unknown ingredients
+        }
+        val caloriesPerUnit = when {
+            isMeat -> 200 // Meats have higher calories
+            isVegetable -> 40 // Vegetables have lower calories
+            isOil -> 120 // Oils are calorie-dense
+            isSpice -> 0 // Spices have negligible calories
+            else -> 100 // Default for unknown ingredients
+        }
+        val servingFactor = when {
+            isMeat -> 1.0 // Main ingredients contribute more to servings
+            isVegetable -> 0.3 // Vegetables contribute less
+            isOil || isSpice -> 0.1 // Oils and spices contribute minimally
+            else -> 0.3 // Default for unknown ingredients
+        }
+
+        // Adjust cook time based on quantity
+        val cookTimeForIngredient = baseCookTime + (ingredient.amount * 2).toInt() // Add 2 minutes per unit
+        totalCookTime = maxOf(totalCookTime, cookTimeForIngredient)
+
+        // Calculate calories based on quantity
+        totalCalories += (caloriesPerUnit * ingredient.amount).toInt()
+
+        // Calculate serving contribution based on quantity
+        totalServingContribution += servingFactor * ingredient.amount
+    }
+
+    // Step 2: Incorporate YouTube video duration (if available)
+    val youtubeDuration = meal.strYoutube?.let { extractVideoDuration(it) }
+    if (youtubeDuration != null) {
+        // Use the YouTube duration as a baseline, but ensure it's at least as long as the ingredient-based cook time
+        totalCookTime = maxOf(totalCookTime, youtubeDuration)
+        // Add preparation time based on the number of ingredients
+        totalCookTime += ingredients.size * 2 // Add 2 minutes per ingredient for prep
+    } else {
+        // If no YouTube duration, add preparation time and apply other adjustments
+        totalCookTime += ingredients.size * 2 // Add 2 minutes per ingredient for prep
+        // If there's a main ingredient (e.g., meat), increase cook time slightly
+        val hasMainIngredient = ingredients.any { ingredient ->
+            val nameLower = ingredient.name.lowercase()
+            nameLower.contains("chicken") || nameLower.contains("beef") ||
+                    nameLower.contains("pork") || nameLower.contains("lamb") || nameLower.contains("fish")
+        }
+        if (hasMainIngredient) {
+            totalCookTime += 5 // Add 5 minutes for main ingredients
+        }
+        // If there are many ingredients, increase cook time
+        if (ingredients.size > 5) {
+            totalCookTime += 10 // Add 10 minutes for complex recipes
+        }
+    }
+    totalCookTime = totalCookTime.coerceIn(10, 120) // Cap between 10 and 120 minutes
+
+    // Step 3: Adjust servings based on total contribution
+    val servings = maxOf(1, (totalServingContribution / 2.0).toInt()) // 1 serving per 2 units of contribution
+    // Adjust servings based on the number of ingredients (more ingredients might mean a larger recipe)
+    val adjustedServings = if (ingredients.size > 5) servings + 1 else servings
+    adjustedServings.coerceIn(1, 12) // Cap between 1 and 12 servings
+
+    // Step 4: Adjust calories based on the number of ingredients
+    totalCalories = totalCalories.coerceIn(100, 2000) // Cap between 100 and 2000 kcal
+    // If there are many ingredients, assume some additional calories for preparation (e.g., oil, seasoning)
+    if (ingredients.size > 5) {
+        totalCalories += 50 // Add 50 kcal for complex recipes
+    }
+
+    // Step 5: Apply contextual rules based on recipe category (if available)
+    meal.strCategory?.let { category ->
+        if (category.lowercase() == "dessert") {
+            totalCookTime += 5 // Desserts might need extra baking time
+            totalCalories += 100 // Desserts often have higher calories
+        } else if (category.lowercase() == "salad") {
+            totalCookTime = (totalCookTime * 0.8).toInt() // Salads are quicker to prepare
+            totalCalories = (totalCalories * 0.7).toInt() // Salads have fewer calories
+        }
+    }
+
+    return RecipeStats(
+        cookTime = totalCookTime,
+        servings = adjustedServings,
+        calories = totalCalories
+    )
 }
