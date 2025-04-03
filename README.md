@@ -33,7 +33,7 @@ EasyCook is a simple and intuitive app that makes cooking easy. Discover a varie
 
 ## 📖 Documentation
 
-For full documentation, visit our GitBook: [EasyCook Documentation]([https://your-gitbook-link.com](https://lahoucines.gitbook.io/easycook))
+For full documentation, visit our GitBook: [EasyCook Documentation](https://lahoucines.gitbook.io/easycook)
 
 ## 🔗 Download
 
