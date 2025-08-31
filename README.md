@@ -39,3 +39,8 @@ For full documentation, visit our GitBook: [EasyCook Documentation](https://laho
 
 Get **EasyCook** on Google Play: [Google Play Store](https://github.com/Lahoucine-chouker/EasyCook)
 
+
+## 📄 License  
+
+This project is licensed under the [MIT License](./LICENSE).  
+
